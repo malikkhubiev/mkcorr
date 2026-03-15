@@ -4,11 +4,11 @@ Malik Khubiev's Correlation Coefficient (MK) - a robust, sign-based measure of m
 
 ## Features
 - **O(n) computational complexity** — fast enough for millions of data points
-- **Highly resistant to outliers** — single outlier changes MK by at most 1/n
+- **Highly resistant to outliers** — single outlier changes MK by at most $$1/n$$
 - **Bootstrap confidence intervals** — uncertainty quantification
 - **Permutation tests** — hypothesis testing for significance
 - **Ties-corrected version** — handles datasets with repeated values
-- **Intuitive interpretation** — ranges from -1 (perfectly decreasing) to 1 (perfectly increasing)
+- **Intuitive interpretation** — ranges from $$-1$$ (perfectly decreasing) to $$1$$ (perfectly increasing)
 
 ## Installation
 
@@ -135,32 +135,15 @@ mk_obs, p_value = mk_test(y, x=x)  # pass x for proper ordering
 print(f"p-value = {p_value:.4f}")
 ```
 
-## Mathematical Definition
-
-For a sequence \(y_1, y_2, \ldots, y_n\) sorted by increasing \(x\):
-
-1. Compute signs of successive differences: \(\delta_i = \text{sign}(y_i - y_{i-1})\)
-2. Global trend direction: \(M = \text{sign}(\sum_{i=2}^n \delta_i)\)
-3. Count increases \(P\) and decreases \(N\)
-4. MK coefficient:
-
-\[
-\text{MK} = 
-\begin{cases}
-\dfrac{P + 1}{n}, & M = +1 \\[1em]
--\dfrac{N + 1}{n}, & M = -1 \\[1em]
-\dfrac{P - N}{n}, & M = 0
-\end{cases}
-\]
-
 ## Properties
 
-- **Range:** MK ∈ [-1, 1]
-- **Complexity:** O(n) after sorting
-- **Robustness:** Single outlier changes MK by at most 1/n
-- **Breakdown point:** 0.5 (can tolerate up to 50% contamination)
-- **Invariance:** Preserved under any order-preserving transformation of y
+- **Range:** $$\text{MK} \in [-1, 1]$$
+- **Complexity:** $$O(n)$$ after sorting
+- **Robustness:** Single outlier changes MK by at most $$1/n$$
+- **Breakdown point:** $$0.5$$ (can tolerate up to 50% contamination)
+- **Invariance:** Preserved under any order-preserving transformation of $$y$$
 - **Ties:** Naturally handled; ties-corrected version available
+- **Asymptotic normality:** Under independence, $$\sqrt{n}\,\text{MK} \xrightarrow{d} N(0,1)$$
 
 ## Citation
 
