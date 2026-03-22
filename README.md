@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163753.svg)](https://doi.org/10.5281/zenodo.19163753)
+
 # MK Correlation Coefficient
 
 Malik Khubiev's Correlation Coefficient (MK) - a robust, sign-based measure of monotonic relationship.
@@ -165,7 +167,7 @@ MIT License - feel free to use, modify, and distribute with attribution.
 ## Links
 
 - **GitHub:** [https://github.com/malikkhubiev/mkcorr](https://github.com/malikkhubiev/mkcorr)
-- **arXiv:** (coming soon)
+- **Zenodo:** [https://doi.org/10.5281/zenodo.19163753](https://doi.org/10.5281/zenodo.19163753)
 - **PyPI:** (coming soon)
 
 ## Contact
