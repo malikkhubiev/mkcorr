@@ -23,10 +23,6 @@ Malik Khubiev's Correlation Coefficient (MK) - a robust, sign-based measure of m
 ## Installation
 
 ```bash
-# Install from PyPI (coming soon)
-pip install mkcorr
-
-# Or install directly from GitHub
 pip install git+https://github.com/malikkhubiev/mkcorr.git
 ```
 
@@ -178,7 +174,6 @@ MIT License - feel free to use, modify, and distribute with attribution.
 
 - **GitHub:** [https://github.com/malikkhubiev/mkcorr](https://github.com/malikkhubiev/mkcorr)
 - **Zenodo:** [https://doi.org/10.5281/zenodo.19163753](https://doi.org/10.5281/zenodo.19163753)
-- **PyPI:** (coming soon)
 
 ## Contact
 
