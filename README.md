@@ -1,4 +1,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163753.svg)](https://doi.org/10.5281/zenodo.19163753)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # MK Correlation Coefficient
 
@@ -11,6 +14,11 @@ Malik Khubiev's Correlation Coefficient (MK) - a robust, sign-based measure of m
 - **Permutation tests** — hypothesis testing for significance
 - **Ties-corrected version** — handles datasets with repeated values
 - **Intuitive interpretation** — ranges from $$-1$$ (perfectly decreasing) to $$1$$ (perfectly increasing)
+
+## Requirements
+
+- Python 3.8 or higher
+- NumPy (tested with 1.21+)
 
 ## Installation
 
@@ -152,11 +160,13 @@ print(f"p-value = {p_value:.4f}")
 If you use MK correlation in your research, please cite:
 
 ```bibtex
-@article{khubiev2026mk,
-  title={Malik Khubiev's Correlation Coefficient: A Robust Sign-Based Measure of Monotonic Relationship},
-  author={Khubiev, Malik},
-  journal={arXiv preprint},
-  year={2026}
+@software{khubiev2026mk,
+  author = {Khubiev, Malik},
+  title = {MK Correlation Coefficient: A Robust Sign-Based Measure of Monotonic Relationship},
+  year = {2026},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.19163753},
+  url = {https://doi.org/10.5281/zenodo.19163753}
 }
 ```
 
