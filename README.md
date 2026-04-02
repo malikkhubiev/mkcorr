@@ -172,8 +172,8 @@ MIT License - feel free to use, modify, and distribute with attribution.
 
 ## Links
 
-- **GitHub:** [https://github.com/malikkhubiev/mkcorr](https://github.com/malikkhubiev/mkcorr)
 - **Zenodo:** [https://doi.org/10.5281/zenodo.19163753](https://doi.org/10.5281/zenodo.19163753)
+- **GitHub:** [https://github.com/malikkhubiev/mkcorr](https://github.com/malikkhubiev/mkcorr)
 
 ## Contact
 
