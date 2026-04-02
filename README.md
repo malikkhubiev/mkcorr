@@ -2,23 +2,138 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+# MK Directional Consistency Measure & DCI Framework
 
-# MK Correlation Coefficient
+## What This Is
 
-Malik Khubiev's Correlation Coefficient (MK) - a robust, sign-based measure of monotonic relationship.
+A diagnostic framework for detecting inconsistency, hidden heterogeneity, and structural breaks in sequential data. The framework combines two measures:
 
-## Features
-- **O(n) computational complexity** — fast enough for millions of data points
-- **Highly resistant to outliers** — single outlier changes MK by at most $$1/n$$
-- **Bootstrap confidence intervals** — uncertainty quantification
-- **Permutation tests** — hypothesis testing for significance
-- **Ties-corrected version** — handles datasets with repeated values
-- **Intuitive interpretation** — ranges from $$-1$$ (perfectly decreasing) to $$1$$ (perfectly increasing)
+- **Spearman's ρ** — global monotonic direction
+- **MK (Directional Consistency Measure)** — local stepwise consistency
 
-## Requirements
+The core contribution is not a new correlation coefficient but a **dual-metric interpretation framework (DCI)** where disagreement between measures signals latent data problems.
 
-- Python 3.8 or higher
-- NumPy (tested with 1.21+)
+## Definition
+
+For sequence y₁,...,yₙ sorted by x if x is not provided, observations are assumed ordered in time or sequence:
+
+**Step 1 — Successive differences:**
+δᵢ = sign(yᵢ - yᵢ₋₁) ∈ {-1, 0, +1}
+
+**Step 2 — Global trend:**
+M = sign(∑δᵢ)
+where sign(0) = 0
+
+**Step 3 — Counts:**
+P = #{δᵢ = +1}, N = #{δᵢ = -1}
+
+**Step 4 — MK:**
+- If M = +1: MK = (P + 1)/n
+- If M = -1: MK = -(N + 1)/n  
+- If M = 0: MK = (P - N)/n
+
++1 accounts for the first observation aligned with global trend direction
+
+**Properties:**
+- Range: [-1, 1]
+- Not symmetric (x defines ordering)
+- Depends on sequence order (by design)
+- O(n) complexity after sorting
+- Single outlier changes MK by at most 1/n
+
+## Diagnostic Matrix (DCI)
+
+| ρ | MK | Diagnosis | Business Implication |
+|---|---|---|---|
+| >0 | >0 | Consistent trend | Trust the signal |
+| >0 | <0 | Trend with reversals | Increase horizon, don't trade short-term |
+| <0 | <0 | Consistent decline | Exit / retrain |
+| <0 | >0 | Decline with bounces | Bull trap — avoid false signals |
+| ≈0 | >0 | Local structure, no global | Segment data — effect cancels |
+| ≈0 | <0 | Pure noise | Measurement problem |
+
+**Core diagnostic rule:** Sign disagreement between ρ and MK is a strong diagnostic signal and practical warning of latent heterogeneity or structural breaks.
+
+## Why Not Kendall's τ?
+
+Kendall's τ (pairwise) and MK (sequential) answer different questions:
+
+| | Kendall's τ | MK |
+|---|---|---|
+| Comparison type | All pairs (n²/2) | Adjacent only (n-1) |
+| Complexity | O(n log n) optimized | O(n) |
+| Sensitive to | Global concordance | Stepwise consistency |
+| Order matters? | No (invariant to permutation) | Yes (by design) |
+
+Use MK when order and stepwise behavior matter. Use Kendall's τ when you need permutation-invariant association.
+
+## Application Areas
+
+### Finance
+
+**Portfolio construction:** Filter by MK. Assets with MK > 0.6 exhibit consistent trends suitable for trend-following. Assets with ρ > 0 but MK < 0 produce gains through rare large moves while losing on most steps — unsuitable for short-term strategies.
+
+**Strategy validation:** A backtest showing ρ > 0 but MK < 0 indicates the strategy profits from infrequent events. Not reliable for execution without understanding these events.
+
+**Risk management:** When ρ and MK diverge, increase holding horizon. Local losses are compensated by global trend.
+
+### ML Model Evaluation
+
+**Stability monitoring:** High ρ with low MK indicates model correct on average but inconsistent stepwise. Signals overfitting or concept drift before global metrics degrade.
+
+**LLM reasoning assessment:** ρ measures answer correctness. MK measures reasoning step consistency. High ρ with low MK means correct answers via flawed reasoning — unacceptable for production.
+
+### Ranking Systems (Search, RecSys)
+
+**User trust:** Low MK with acceptable ρ produces "correct on average but jumps erratically" experience. Users cannot form mental model of system behavior.
+
+**A/B testing diagnosis:** ρ unchanged but MK changed significantly indicates treatment effects exist but cancel globally. Requires segment analysis.
+
+### DevOps / System Monitoring
+
+**Anomaly detection:** MK < 0.3 indicates metric behaves as noise. Alert thresholds on such metrics generate false positives.
+
+**Incident validation:** During incident, negative MK confirms consistent degradation. Positive MK with negative ρ suggests intermittent issues — different root cause.
+
+### A/B Testing
+
+**Heterogeneous effects:** |ρ| < ε where ε is a small threshold (e.g., 0.05) but MK ≠ 0 → treatment affects subgroups differently. Do not conclude "no effect" without segmentation.
+
+**Guardrail metrics:** High MK indicates reliable monitoring metric. Low MK means metric oscillates — use with caution.
+
+### Scientific Data Analysis
+
+**Simpson's paradox detection:** Sign disagreement between ρ and MK is a practical indicator of potential Simpson's paradox or hidden heterogeneity. Triggers stratified analysis.
+
+**Experimental design:** Low MK in control group indicates measurement noise exceeds signal. Increase sample size or improve measurement.
+
+## When to Use Which
+
+| Question | Method |
+|----------|--------|
+| Global trend direction? | Spearman's ρ |
+| Data has outliers? | MK |
+| Need O(n) on millions of points? | MK |
+| Detect heterogeneity/structural breaks? | DCI (ρ + MK) |
+| Stepwise consistency matters? | MK |
+| Compare with published results? | Spearman's ρ |
+| Permutation-invariant association? | Kendall's τ |
+
+## Interpretation
+
+- MK ≈ 1 → nearly all steps follow a consistent upward trend  
+- MK ≈ -1 → nearly all steps follow a consistent downward trend  
+- MK ≈ 0 → no consistent local direction (oscillating or noisy behavior)
+
+`MK can be interpreted as an empirical estimate of the probability that the next step follows the global trend direction.`
+
+## Limitations
+
+- MK ignores magnitude (small and large changes count equally)
+- Standard version conservative with ties (ties-corrected version available)
+- Discontinuity at trend direction flip (magnitude 1/n, negligible for n large)
+- Not symmetric in x and y (by design — x defines ordering)
+- Not a correlation coefficient in mathematical statistics sense (not centered, permutation-variant)
 
 ## Installation
 
@@ -26,143 +141,30 @@ Malik Khubiev's Correlation Coefficient (MK) - a robust, sign-based measure of m
 pip install git+https://github.com/malikkhubiev/mkcorr.git
 ```
 
-## Quick Start
+## Quick Example
 
 ```python
 import numpy as np
-from mkcorr import mk_coefficient, mk_ties_corrected, mk_ci, mk_test
-
-# Example data with an outlier
-y = [1, 2, 3, 100, 4, 5, 6, 7]
-
-# 1. Compute MK coefficient
-mk = mk_coefficient(y)
-print(f"MK = {mk:.3f}")  # MK = 0.750
-
-# 2. Ties-corrected version (for data with repeated values)
-y_ties = [1, 1, 2, 2, 3, 3, 4, 4]
-mk_ties = mk_ties_corrected(y_ties)
-print(f"MK (ties-corrected) = {mk_ties:.3f}")  # MK = 0.833
-
-# 3. Bootstrap confidence interval
-ci_low, ci_high = mk_ci(y, B=1000)
-print(f"95% CI: [{ci_low:.3f}, {ci_high:.3f}]")
-
-# 4. Permutation test for significance
-mk_obs, p_value = mk_test(y)
-print(f"p-value = {p_value:.3f}")
-```
-
-## Detailed Usage
-
-### Basic MK Coefficient
-
-```python
 from mkcorr import mk_coefficient
+from scipy.stats import spearmanr
 
-# Strictly increasing sequence
-print(mk_coefficient([1, 2, 3, 4]))        # 1.0
-
-# Strictly decreasing sequence
-print(mk_coefficient([4, 3, 2, 1]))        # -1.0
-
-# Sequence with an outlier (the motivating example)
-print(mk_coefficient([2, 3, 1, 4]))        # 0.75
-
-# Sequence with no clear trend
-print(mk_coefficient([1, 2, 1, 2, 1]))     # 0.0
-```
-
-### Ties-Corrected Version
-
-When your data contains many repeated consecutive values, the standard MK coefficient is conservative. Use the ties-corrected version:
-
-```python
-from mkcorr import mk_coefficient, mk_ties_corrected
-
-y = [1, 1, 2, 2, 3, 3, 4, 4]
-
-print(f"Standard MK: {mk_coefficient(y):.3f}")        # 0.625
-print(f"Ties-corrected MK: {mk_ties_corrected(y):.3f}")  # 0.833
-```
-
-### Bootstrap Confidence Intervals
-
-```python
-from mkcorr import mk_ci
-
+# Data: increasing with one outlier
 y = [1, 2, 3, 100, 4, 5, 6, 7]
 
-# 95% confidence interval
-ci_95 = mk_ci(y, B=1000, alpha=0.05)
-print(f"95% CI: [{ci_95[0]:.3f}, {ci_95[1]:.3f}]")
+rho, _ = spearmanr(y)  # 0.95 — global positive
+mk = mk_coefficient(y)  # 0.75 — slightly reduced by outlier
 
-# 90% confidence interval
-ci_90 = mk_ci(y, B=1000, alpha=0.10)
-print(f"90% CI: [{ci_90[0]:.3f}, {ci_90[1]:.3f}]")
+# DCI diagnosis: consistent trend (both positive)
 ```
-
-### Permutation Test
-
-```python
-from mkcorr import mk_test
-
-y = [1, 2, 3, 100, 4, 5, 6, 7]
-mk_obs, p_value = mk_test(y, B=10000)
-print(f"Observed MK = {mk_obs:.3f}")
-print(f"P-value = {p_value:.4f}")
-
-if p_value < 0.05:
-    print("Significant trend detected (p < 0.05)")
-```
-
-### Working with (x, y) Pairs
-
-If your data comes as (x, y) pairs, sort by x first:
-
-```python
-import numpy as np
-from mkcorr import mk_coefficient, mk_test
-
-# Unsorted data
-x = [10, 20, 5, 15, 25]
-y = [2, 4, 1, 3, 5]
-
-# Sort by x
-idx = np.argsort(x)
-y_sorted = np.array(y)[idx]
-
-# Now compute MK
-mk = mk_coefficient(y_sorted)
-print(f"MK = {mk:.3f}")
-
-# Permutation test with x
-mk_obs, p_value = mk_test(y, x=x)  # pass x for proper ordering
-print(f"p-value = {p_value:.4f}")
-```
-
-## Properties
-
-- **Range:** $$\text{MK} \in [-1, 1]$$
-- **Complexity:** $$O(n)$$ after sorting
-- **Robustness:** Single outlier changes MK by at most $$1/n$$
-- **Breakdown point:** $$0.5$$ (can tolerate up to 50% contamination)
-- **Invariance:** Preserved under any order-preserving transformation of $$y$$
-- **Ties:** Naturally handled; ties-corrected version available
-- **Asymptotic normality:** Under independence, $$\sqrt{n}\,\text{MK} \xrightarrow{d} N(0,1)$$
 
 ## Citation
-
-If you use MK correlation in your research, please cite:
 
 ```bibtex
 @software{khubiev2026mk,
   author = {Khubiev, Malik},
-  title = {MK Correlation Coefficient: A Robust Sign-Based Measure of Monotonic Relationship},
+  title = {MK Directional Consistency Measure and DCI Framework},
   year = {2026},
-  publisher = {Zenodo},
-  doi = {10.5281/zenodo.19163753},
-  url = {https://doi.org/10.5281/zenodo.19163753}
+  doi = {10.5281/zenodo.19163753}
 }
 ```
 
